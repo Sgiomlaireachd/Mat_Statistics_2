@@ -5,11 +5,13 @@ import numpy as np
 
 a = 0
 sigma = 0
-n = 9
+n = 9 #6
 k = 11
 alfa = 0.05
-X = [[100 * i,100 * (i+1)] for i in range(n)]
+step = 100 #5
+X = [[step * i,step * (i+1)] for i in range(n)]
 M = [1,9 + k,18,33,40 - k, 52 - k, 29, 14 + k, 4]
+# M = [133,45,15,4,2,1]
 P = []
 Sum = sum(M)
 
@@ -47,12 +49,20 @@ def deviation(keys,values,avg):
 def f(x):
     return math.exp((-(x-a)**2)/(2*sigma**2))
 def pirson():
-    return sum([(((m - n*p)**2)/n*p) for m,p in zip(M,P)])
-
+    SUM = 0
+    for m,p in zip(M,P):
+        upper = (m - Sum * p)**2
+        # print('upper:',upper)
+        bottom = Sum*p
+        # print('bottom:',bottom)
+        SUM += upper/bottom
+    return SUM
+def Result(emp,crit):
+    print('The hipotesis is true') if emp < crit else print('The hipotesis is false')
 def method():
     global a,sigma,P
     a = average([((i[0] + i[1]) / 2) for i in X], M)
-    sigma = math.sqrt(1/(n-1) * deviation([((i[0] + i[1]) / 2) for i in X], M,a))
+    sigma = math.sqrt(1/(Sum-1) * deviation([((i[0] + i[1]) / 2) for i in X], M,a))
     print('\na:',a,'\nσ:',sigma)
     for i,x in enumerate(X):
         if i > 0 and i < n-1:
@@ -62,22 +72,16 @@ def method():
         if i == n-1:
             P.append((1/(sigma * math.sqrt(2*np.pi))) * (quad(f,x[0],np.inf)[0]))
     emp = pirson()
-    print('Χ²:',emp)
     df = n - 3
+    print('Χ²:',emp)
     print('\ndf:',df)
     print('Alpha:',alfa)
     return emp
         
-    
-
-
-
-
 def main():
     mergeIfNeeded()
     emp = method()
     printTable()
     crit = float(input('\nInput:'))
-    if emp < crit: print('The hipotesis is true')
-    else: print('The hipotesis is false')
+    Result(emp,crit)
 main()
